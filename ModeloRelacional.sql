@@ -187,7 +187,7 @@ CREATE TABLE CartaoCredito(
                     REFERENCES Doacao(nome_canal, titulo_video, datah_video, nick_usuario, sequencial_comentario, sequencial_pagamento)
 
 );
-
+CREATE SEQUENCE PlataformaSequence START WITH 1 INCREMENT BY 1 NO MAXVALUE CACHE 1;
 CREATE TABLE MecanismoPlat(
     nome_canal varchar,
     titulo_video varchar,
