@@ -148,3 +148,56 @@ CREATE TABLE Doacao(
     FOREIGN KEY (nome_canal, titulo_video, datah_video, nick_usuario, sequencial_comentario) REFERENCES Comentario(nome_canal, titulo_video, datah_video, nick_usuario, sequencial),
     UNIQUE (sequencial_pagamento)
 );
+
+CREATE TABLE BitCoin(
+    nome_canal varchar,
+    titulo_video varchar,
+    datah_video timestamp,
+    nick_usuario varchar,
+    sequencial_comentario int,
+    sequencial_doacao int,
+    TxID varchar,
+    FOREIGN KEY (nome_canal, titulo_video, dataH_video, nick_usuario, sequencial_comentario, sequencial_doacao)
+                    REFERENCES Doacao(nome_canal, titulo_video, datah_video, nick_usuario, sequencial_comentario, sequencial_pagamento)
+
+);
+CREATE TABLE PayPal(
+    nome_canal varchar,
+    titulo_video varchar,
+    datah_video timestamp,
+    nick_usuario varchar,
+    sequencial_comentario int,
+    sequencial_doacao int,
+    IdPayPal varchar,
+    FOREIGN KEY (nome_canal, titulo_video, dataH_video, nick_usuario, sequencial_comentario, sequencial_doacao)
+                    REFERENCES Doacao(nome_canal, titulo_video, datah_video, nick_usuario, sequencial_comentario, sequencial_pagamento)
+
+);
+
+CREATE TABLE CartaoCredito(
+    nome_canal varchar,
+    titulo_video varchar,
+    datah_video timestamp,
+    nick_usuario varchar,
+    sequencial_comentario int,
+    sequencial_doacao int,
+    nro varchar,
+    bandeira varchar,
+    FOREIGN KEY (nome_canal, titulo_video, dataH_video, nick_usuario, sequencial_comentario, sequencial_doacao)
+                    REFERENCES Doacao(nome_canal, titulo_video, datah_video, nick_usuario, sequencial_comentario, sequencial_pagamento)
+
+);
+
+CREATE TABLE MecanismoPlat(
+    nome_canal varchar,
+    titulo_video varchar,
+    datah_video timestamp,
+    nick_usuario varchar,
+    sequencial_comentario int,
+    sequencial_doacao int,
+    sequencial_plataforma int,
+    FOREIGN KEY (nome_canal, titulo_video, dataH_video, nick_usuario, sequencial_comentario, sequencial_doacao)
+                    REFERENCES Doacao(nome_canal, titulo_video, datah_video, nick_usuario, sequencial_comentario, sequencial_pagamento)
+
+);
+
