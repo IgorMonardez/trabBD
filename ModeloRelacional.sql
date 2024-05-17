@@ -82,11 +82,12 @@ CREATE TABLE Patrocinio(
 );
 
 CREATE TABLE NivelCanal(
-    nome_canal varchar primary key,
+    nome_canal varchar,
     nivel int,
     valor float,
     gif bytea,
-    FOREIGN KEY (nome_canal) REFERENCES Canal(nome)
+    FOREIGN KEY (nome_canal) REFERENCES Canal(nome),
+    PRIMARY KEY (nome_canal, nivel)
 );
 
 CREATE TABLE Inscricao(
@@ -94,7 +95,8 @@ CREATE TABLE Inscricao(
     nick_membro varchar,
     nivel int,
     FOREIGN KEY (nome_canal, nivel) REFERENCES NivelCanal(nome_canal, nivel),
-    FOREIGN KEY (nick_membro) REFERENCES Usuario(nick)
+    FOREIGN KEY (nick_membro) REFERENCES Usuario(nick),
+    PRIMARY KEY (nome_canal, nick_membro)
 );
 
 CREATE TABLE Video(
