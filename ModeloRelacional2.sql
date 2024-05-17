@@ -2,15 +2,14 @@
 CREATE TABLE Empresa (
     nro INT PRIMARY KEY,
     nome VARCHAR(255) NOT NULL,
-    nome_fantasia VARCHAR(255) NOT NULL,
-    qtd_users INT -- This is a derived attribute and requires periodic updates
+    nome_fantasia VARCHAR(255) NOT NULL
 );
 
 -- Create Plataforma table
 CREATE TABLE Plataforma (
     nro INT PRIMARY KEY,
     nome VARCHAR(255) NOT NULL,
-    qtd_users INT NOT NULL,
+    qtd_users INT NOT NULL, -- ATRIBUTO DERIVADO
     empresa_fund INT,
     empresa_respo INT,
     data_fund DATE,
@@ -80,7 +79,7 @@ CREATE TABLE Canal (
     tipo VARCHAR(255),
     data DATE,
     descr TEXT,
-    qtd_visualizacoes INT, -- This is a derived attribute and requires periodic updates
+    qtd_visualizacoes INT, -- ATRIBUTO DERIVADO
     nick_streamer VARCHAR(255),
     nro_plataforma INT,
     FOREIGN KEY (nro_plataforma) REFERENCES Plataforma(nro),
@@ -117,8 +116,6 @@ CREATE TABLE Inscricao (
     PRIMARY KEY (nome_canal, nick_membro)
 );
 
--- Daqui pra baixo faz sentido refatorar para que vídeo tenha um idfake
-    --
 -- Create Video table
 CREATE TABLE Video (
     id_video SERIAL PRIMARY KEY,
