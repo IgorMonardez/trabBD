@@ -1,4 +1,4 @@
---CREATE SCHEMA trabBD2;
+CREATE SCHEMA trabBD2;
 
 SET search_path TO trabBD2;
 
