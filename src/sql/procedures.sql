@@ -114,3 +114,140 @@ $$ LANGUAGE plpgsql;
 
 SELECT * FROM get_video_doacoes();
 SELECT * FROM get_video_doacoes(4040);
+
+-- Procedure 5
+DROP FUNCTION IF EXISTS get_top_k_canais_patrocinio(INT);
+
+CREATE OR REPLACE FUNCTION get_top_k_canais_patrocinio(k INT)
+RETURNS TABLE (
+    nome_canal VARCHAR(255),
+    total_patrocinio DECIMAL(10, 2)
+) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT
+        p.nome_canal,
+        SUM(p.valor) AS total_patrocinio
+    FROM
+        trabbd2.patrocinio p
+    GROUP BY
+        p.nome_canal
+    ORDER BY
+        total_patrocinio DESC
+    LIMIT k;
+END;
+$$ LANGUAGE plpgsql;
+
+SELECT * FROM get_top_k_canais_patrocinio(10);
+
+-- Procedure 6
+DROP FUNCTION IF EXISTS get_top_k_canais_aportes(INT);
+
+CREATE OR REPLACE FUNCTION get_top_k_canais_aportes(k INT)
+RETURNS TABLE (
+    nome_canal VARCHAR(255),
+    total_aportes DECIMAL(10, 2)
+) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT
+        nc.nome_canal,
+        SUM(nc.valor) AS total_aportes
+    FROM
+        trabbd2.inscricao i
+    JOIN
+        trabbd2.nivelcanal nc ON i.nome_canal = nc.nome_canal AND i.nivel = nc.nivel
+    GROUP BY
+        nc.nome_canal
+    ORDER BY
+        total_aportes DESC
+    LIMIT k;
+END;
+$$ LANGUAGE plpgsql;
+
+SELECT * FROM get_top_k_canais_aportes(10);
+
+-- Procedure 7
+DROP FUNCTION IF EXISTS get_top_k_canais_doacoes(INT);
+
+CREATE OR REPLACE FUNCTION get_top_k_canais_doacoes(k INT)
+RETURNS TABLE (
+    nome_canal VARCHAR(255),
+    total_doacoes DECIMAL(10, 2)
+) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT
+        v.nome_canal,
+        SUM(d.valor) AS total_doacoes
+    FROM
+        trabbd2.doacao d
+    JOIN
+        trabbd2.video v ON d.id_video = v.id_video
+    GROUP BY
+        v.nome_canal
+    ORDER BY
+        total_doacoes DESC
+    LIMIT k;
+END;
+$$ LANGUAGE plpgsql;
+
+SELECT * FROM get_top_k_canais_doacoes(10);
+
+-- Procedure 8
+DROP FUNCTION IF EXISTS get_top_k_canais_faturamento(INT);
+
+CREATE OR REPLACE FUNCTION get_top_k_canais_faturamento(k INT)
+RETURNS TABLE (
+    nome_canal VARCHAR(255),
+    total_faturamento DECIMAL(10, 2)
+) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT
+        c.nome AS nome_canal,
+        COALESCE(SUM(p.total_patrocinio), 0) +
+        COALESCE(SUM(m.total_aportes), 0) +
+        COALESCE(SUM(d.total_doacoes), 0) AS total_faturamento
+    FROM
+        trabbd2.canal c
+    LEFT JOIN (
+        SELECT
+            p.nome_canal,
+            SUM(p.valor) AS total_patrocinio
+        FROM
+            trabbd2.patrocinio p
+        GROUP BY
+            p.nome_canal
+    ) p ON c.nome = p.nome_canal
+    LEFT JOIN (
+        SELECT
+            nc.nome_canal,
+            SUM(nc.valor) AS total_aportes
+        FROM
+            trabbd2.inscricao i
+        JOIN
+            trabbd2.nivelcanal nc ON i.nome_canal = nc.nome_canal AND i.nivel = nc.nivel
+        GROUP BY
+            nc.nome_canal
+    ) m ON c.nome = m.nome_canal
+    LEFT JOIN (
+        SELECT
+            v.nome_canal,
+            SUM(d.valor) AS total_doacoes
+        FROM
+            trabbd2.doacao d
+        JOIN
+            trabbd2.video v ON d.id_video = v.id_video
+        GROUP BY
+            v.nome_canal
+    ) d ON c.nome = d.nome_canal
+    GROUP BY
+        c.nome
+    ORDER BY
+        total_faturamento DESC
+    LIMIT k;
+END;
+$$ LANGUAGE plpgsql;
+
+SELECT * FROM get_top_k_canais_faturamento(10);
