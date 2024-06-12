@@ -2,25 +2,18 @@
 DROP FUNCTION IF EXISTS get_valor_by_nome(VARCHAR(255));
 
 CREATE OR REPLACE FUNCTION get_valor_by_nome(empresa_nome VARCHAR(255) DEFAULT NULL)
-RETURNS TABLE (nome_canal VARCHAR(255), nome_empresa VARCHAR(255), valor DECIMAL)
-LANGUAGE plpgsql
+RETURNS TABLE (CANAL_PATROCINADO VARCHAR(255), EMPRESA_PAGADORA VARCHAR(255), VALOR_PATROCINIO DECIMAL)
+LANGUAGE SQL
 AS $$
-BEGIN
-    IF empresa_nome IS NULL THEN
-        RETURN QUERY EXECUTE 'SELECT patr.nome_canal as CANAL, empr.nome as EMPRESA, patr.valor as VALOR
-                              FROM trabbd2.patrocinio patr
-                              INNER JOIN trabbd2.empresa empr on empr.nro = patr.nro_empresa
-                              GROUP BY empr.nome, patr.nome_canal, patr.valor';
-    ELSE
-        RETURN QUERY EXECUTE 'SELECT patr.nome_canal as CANAL, empr.nome as EMPRESA, patr.valor as VALOR
-                              FROM trabbd2.patrocinio patr
-                              INNER JOIN trabbd2.empresa empr on empr.nro = patr.nro_empresa
-                              WHERE empr.nome = $1
-                              GROUP BY empr.nome, patr.nome_canal, patr.valor' USING empresa_nome;
-    END IF;
-END; $$;
+    SELECT patr.nome_canal, empr.nome, patr.valor
+    FROM trabbd2.patrocinio patr
+    INNER JOIN trabbd2.empresa empr on empr.nro = patr.nro_empresa
+    WHERE (empresa_nome IS NOT NULL AND empr.nome = empresa_nome )OR(empresa_nome IS NULL)
+    GROUP BY empr.nome, patr.nome_canal, patr.valor;
+$$;
 
-SELECT * FROM get_valor_by_nome('Miller-Lowe');
+SELECT * FROM get_valor_by_nome('Powell, Johnson and Miller');
+SELECT * FROM get_valor_by_nome(SELECT empr.nome FROM trabbd2.empresa empr WHERE empr.nome = 'Powell, Johnson and Miller');
 SELECT * FROM get_valor_by_nome();
 
 -- Procedure 2
