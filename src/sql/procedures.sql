@@ -8,12 +8,11 @@ AS $$
     SELECT patr.nome_canal, empr.nome, patr.valor
     FROM trabbd2.patrocinio patr
     INNER JOIN trabbd2.empresa empr on empr.nro = patr.nro_empresa
-    WHERE (empresa_nome IS NOT NULL AND empr.nome = empresa_nome )OR(empresa_nome IS NULL)
+    WHERE empr.nome = empresa_nome OR empresa_nome IS NULL
     GROUP BY empr.nome, patr.nome_canal, patr.valor;
 $$;
 
 SELECT * FROM get_valor_by_nome('Powell, Johnson and Miller');
-SELECT * FROM get_valor_by_nome(SELECT empr.nome FROM trabbd2.empresa empr WHERE empr.nome = 'Powell, Johnson and Miller');
 SELECT * FROM get_valor_by_nome();
 
 -- Procedure 2
@@ -24,9 +23,9 @@ RETURNS TABLE (
     usuario VARCHAR(255),
     total_canais BIGINT,
     total_gasto DECIMAL(10, 2)
-) AS $$
-BEGIN
-    RETURN QUERY
+)
+LANGUAGE SQL
+AS $$
     SELECT
         i.nick_membro AS usuario,
         COUNT(i.nome_canal) AS total_canais,
@@ -41,11 +40,10 @@ BEGIN
         p_nick_membro IS NULL OR i.nick_membro = p_nick_membro
     GROUP BY
         i.nick_membro;
-END;
-$$ LANGUAGE plpgsql;
+$$;
 
 SELECT * FROM get_user_subscriptions();
-SELECT * FROM get_user_subscriptions('shannon48');
+SELECT * FROM get_user_subscriptions('andrewfreeman');
 
 -- Procedure 3
 DROP FUNCTION IF EXISTS get_user_subscriptions(VARCHAR(255), VARCHAR(255));
@@ -54,9 +52,9 @@ CREATE OR REPLACE FUNCTION get_canal_doacoes(p_nome_canal VARCHAR(255) DEFAULT N
 RETURNS TABLE (
     nome_canal VARCHAR(255),
     total_doacoes DECIMAL(10, 2)
-) AS $$
-BEGIN
-    RETURN QUERY
+)
+LANGUAGE SQL
+AS $$
     SELECT
         c.nome AS nome_canal,
         SUM(d.valor) AS total_doacoes
@@ -72,11 +70,9 @@ BEGIN
         c.nome
     ORDER BY
         total_doacoes DESC;
-END;
-$$ LANGUAGE plpgsql;
-
+$$;
 SELECT * FROM get_canal_doacoes();
-SELECT * FROM get_canal_doacoes('amber08_channel');
+SELECT * FROM get_canal_doacoes('jamescasey_channel');
 
 -- Procedure 4
 DROP FUNCTION IF EXISTS get_user_subscriptions(VARCHAR(255), VARCHAR(255));
@@ -85,9 +81,9 @@ CREATE OR REPLACE FUNCTION get_video_doacoes(p_id_video INT DEFAULT NULL)
 RETURNS TABLE (
     id_video INT,
     total_doacoes DECIMAL(10, 2)
-) AS $$
-BEGIN
-    RETURN QUERY
+)
+LANGUAGE SQL
+AS $$
     SELECT
         d.id_video,
         SUM(d.valor) AS total_doacoes
@@ -102,8 +98,7 @@ BEGIN
         d.id_video
     ORDER BY
         total_doacoes DESC;
-END;
-$$ LANGUAGE plpgsql;
+$$;
 
 SELECT * FROM get_video_doacoes();
 SELECT * FROM get_video_doacoes(4040);
@@ -140,9 +135,9 @@ CREATE OR REPLACE FUNCTION get_top_k_canais_aportes(k INT)
 RETURNS TABLE (
     nome_canal VARCHAR(255),
     total_aportes DECIMAL(10, 2)
-) AS $$
-BEGIN
-    RETURN QUERY
+)
+LANGUAGE SQL
+AS $$
     SELECT
         nc.nome_canal,
         SUM(nc.valor) AS total_aportes
@@ -155,8 +150,7 @@ BEGIN
     ORDER BY
         total_aportes DESC
     LIMIT k;
-END;
-$$ LANGUAGE plpgsql;
+$$;
 
 SELECT * FROM get_top_k_canais_aportes(10);
 
@@ -167,9 +161,9 @@ CREATE OR REPLACE FUNCTION get_top_k_canais_doacoes(k INT)
 RETURNS TABLE (
     nome_canal VARCHAR(255),
     total_doacoes DECIMAL(10, 2)
-) AS $$
-BEGIN
-    RETURN QUERY
+)
+    LANGUAGE SQL
+AS $$
     SELECT
         v.nome_canal,
         SUM(d.valor) AS total_doacoes
@@ -182,8 +176,7 @@ BEGIN
     ORDER BY
         total_doacoes DESC
     LIMIT k;
-END;
-$$ LANGUAGE plpgsql;
+$$;
 
 SELECT * FROM get_top_k_canais_doacoes(10);
 
@@ -194,9 +187,9 @@ CREATE OR REPLACE FUNCTION get_top_k_canais_faturamento(k INT)
 RETURNS TABLE (
     nome_canal VARCHAR(255),
     total_faturamento DECIMAL(10, 2)
-) AS $$
-BEGIN
-    RETURN QUERY
+)
+LANGUAGE sql
+AS $$
     SELECT
         c.nome AS nome_canal,
         COALESCE(SUM(p.total_patrocinio), 0) +
@@ -239,8 +232,7 @@ BEGIN
         c.nome
     ORDER BY
         total_faturamento DESC
-    LIMIT k;
-END;
-$$ LANGUAGE plpgsql;
+LIMIT k;
+$$;
 
 SELECT * FROM get_top_k_canais_faturamento(10);
