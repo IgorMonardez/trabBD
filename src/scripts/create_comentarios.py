@@ -157,7 +157,6 @@ for video in videos:
                 seq_plataforma_str = nro_plataforma_str + seq_comentario_str + seq_doacao_str
                 seq_plataforma = int(seq_plataforma_str)
 
-
                 cur.execute(
                     f"""
                     INSERT INTO {schema}.MecanismoPlat (id_video, nick_usuario, seq_comentario, seq_doacao, seq_plataforma)

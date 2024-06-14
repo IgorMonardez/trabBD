@@ -46,7 +46,7 @@ SELECT * FROM get_user_subscriptions();
 SELECT * FROM get_user_subscriptions('andrewfreeman');
 
 -- Procedure 3
-DROP FUNCTION IF EXISTS get_user_subscriptions(VARCHAR(255), VARCHAR(255));
+DROP FUNCTION IF EXISTS get_canal_doacoes(VARCHAR(255));
 
 CREATE OR REPLACE FUNCTION get_canal_doacoes(p_nome_canal VARCHAR(255) DEFAULT NULL)
 RETURNS TABLE (
@@ -75,7 +75,7 @@ SELECT * FROM get_canal_doacoes();
 SELECT * FROM get_canal_doacoes('jamescasey_channel');
 
 -- Procedure 4
-DROP FUNCTION IF EXISTS get_user_subscriptions(VARCHAR(255), VARCHAR(255));
+DROP FUNCTION IF EXISTS get_video_doacoes(p_id_video INT);
 
 CREATE OR REPLACE FUNCTION get_video_doacoes(p_id_video INT DEFAULT NULL)
 RETURNS TABLE (
@@ -99,7 +99,6 @@ AS $$
     ORDER BY
         total_doacoes DESC;
 $$;
-
 SELECT * FROM get_video_doacoes();
 SELECT * FROM get_video_doacoes(4040);
 
@@ -110,9 +109,9 @@ CREATE OR REPLACE FUNCTION get_top_k_canais_patrocinio(k INT)
 RETURNS TABLE (
     nome_canal VARCHAR(255),
     total_patrocinio DECIMAL(10, 2)
-) AS $$
-BEGIN
-    RETURN QUERY
+)
+LANGUAGE sql
+AS $$
     SELECT
         p.nome_canal,
         SUM(p.valor) AS total_patrocinio
@@ -123,8 +122,7 @@ BEGIN
     ORDER BY
         total_patrocinio DESC
     LIMIT k;
-END;
-$$ LANGUAGE plpgsql;
+$$;
 
 SELECT * FROM get_top_k_canais_patrocinio(10);
 
