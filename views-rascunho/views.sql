@@ -6,7 +6,7 @@ SELECT
     empr.nome AS empresa_pagadora,
     patr.valor AS valor_patrocinio
 FROM
-    Patrocionio patr
+    Patrocinio patr
 INNER JOIN
     Empresa empr ON empr.nro = patr.nro_empresa;
 
@@ -19,86 +19,79 @@ SELECT
     COUNT(i.nome_canal) AS total_canais,
     SUM(nc.valor) AS total_gasto
 FROM
-    Inscrição i
+    trabbd2.inscricao i
 JOIN
-    NivelCanal nc ON i.nome_canal = nc.nome_canal AND i.nivel = nc.nivel
+    trabbd2.nivelcanal nc
+    ON
+    i.nome_canal = nc.nome_canal AND i.nivel = nc.nivel
 GROUP BY
     i.nick_membro;
 
 
--- View para listar os canais e a soma dos valores de doações recebidas
+-- View para listar os videos e a soma dos valores de doações recebidas
 
-CREATE OR REPLACE VIEW canal_doacoes AS
+CREATE OR REPLACE VIEW video_doacoes AS
 SELECT
-    c.nome AS nome_canal,
+    v.id_video AS id_video,
     SUM(d.valor) AS total_doacoes
 FROM
-    Doacao d
+    trabbd2.doacao d
 JOIN
-    Video v ON d.nome_canal = v.nome_canal AND d.titulo_video = v.titulo AND d.dataH_video = v.dataH
+    trabbd2.video v ON d.id_video = v.id_video
 JOIN
-    Canal c ON v.nome_canal = c.nome
+    trabbd2.comentario c ON d.id_video = c.id_video AND d.nick_usuario = c.nick_usuario AND d.seq_comentario = c.seq
+WHERE c.coment_on = TRUE
 GROUP BY
-    c.nome;
-
-
-
--- View para mostrar os valores de patrocínio por canal
-
-CREATE OR REPLACE VIEW top_canais_patrocinio AS
-SELECT
-    p.nome_canal,
-    SUM(p.valor) AS total_patrocinio
-FROM
-    Patrocionio p
-GROUP BY
-    p.nome_canal
+    v.id_video
 ORDER BY
-    total_patrocinio DESC;
+    total_doacoes DESC;
 
 
--- View materializada para mostrar o faturamento total por canal
 
-CREATE MATERIALIZED VIEW top_canais_faturamento AS
+-- View para mostrar os maiores valores por canal
+
+CREATE MATERIALIZED VIEW top_canais AS
 SELECT
     c.nome AS nome_canal,
-    COALESCE(p.total_patrocinio, 0) +
-    COALESCE(m.total_aportes, 0) +
-    COALESCE(d.total_doacoes, 0) AS total_faturamento
+    COALESCE(SUM(p.total_patrocinio), 0) as total_patrocinio,
+    COALESCE(SUM(m.total_aportes), 0) as total_aportes,
+    COALESCE(SUM(d.total_doacoes), 0) as total_doacoes,
+    total_patrocinio + total_aportes + total_doacoes AS total_faturamento
 FROM
-    Canal c
+    trabbd2.canal c
 LEFT JOIN (
     SELECT
-        p.nome_canal,
-        SUM(p.valor) AS total_patrocinio
+    p.nome_canal,
+    SUM(p.valor) AS total_patrocinio
     FROM
-        Patrocionio p
+        trabbd2.patrocinio p
     GROUP BY
         p.nome_canal
-) p ON c.nome = p.nome_canal
+    ) p ON c.nome = p.nome_canal
 LEFT JOIN (
     SELECT
         nc.nome_canal,
         SUM(nc.valor) AS total_aportes
     FROM
-        Inscrição i
+        trabbd2.inscricao i
     JOIN
-        NivelCanal nc ON i.nome_canal = nc.nome_canal AND i.nivel = nc.nivel
+        trabbd2.nivelcanal nc ON i.nome_canal = nc.nome_canal AND i.nivel = nc.nivel
     GROUP BY
         nc.nome_canal
-) m ON c.nome = m.nome_canal
+    ) m ON c.nome = m.nome_canal
 LEFT JOIN (
     SELECT
         v.nome_canal,
         SUM(d.valor) AS total_doacoes
     FROM
-        Doacao d
+        trabbd2.doacao d
     JOIN
-        Video v ON d.nome_canal = v.nome_canal AND d.titulo_video = v.titulo AND d.dataH_video = v.dataH
+        trabbd2.video v ON d.id_video = v.id_video
     GROUP BY
         v.nome_canal
-) d ON c.nome = d.nome_canal
+    ) d ON c.nome = d.nome_canal
 GROUP BY
-    c.nome
-ORDER BY
-    total_faturamento DESC;
+    c.nome, p.total_patrocinio, m.total_aportes, d.total_doacoes;
+
+
+-- Fazer hash em cima de nomes para indices,

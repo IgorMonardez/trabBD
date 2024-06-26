@@ -5,14 +5,16 @@ CREATE OR REPLACE FUNCTION get_valor_by_nome(empresa_nome VARCHAR(255) DEFAULT N
 RETURNS TABLE (CANAL_PATROCINADO VARCHAR(255), EMPRESA_PAGADORA VARCHAR(255), VALOR_PATROCINIO DECIMAL)
 LANGUAGE SQL
 AS $$
-    SELECT patr.nome_canal, empr.nome, patr.valor
-    FROM trabbd2.patrocinio patr
-    INNER JOIN trabbd2.empresa empr on empr.nro = patr.nro_empresa
-    WHERE empr.nome = empresa_nome OR empresa_nome IS NULL
-    GROUP BY empr.nome, patr.nome_canal, patr.valor;
+SELECT
+    nome_canal, empresa_pagadora, valor_patrocinio
+FROM
+    canais_patrocinados
+WHERE
+    empresa_pagadora = empresa_nome OR empresa_nome IS NULL
+ORDER BY valor_patrocinio DESC;
 $$;
 
-SELECT * FROM get_valor_by_nome('Powell, Johnson and Miller');
+SELECT * FROM get_valor_by_nome('Green, Bass and Hernandez');
 SELECT * FROM get_valor_by_nome();
 
 -- Procedure 2
@@ -27,23 +29,17 @@ RETURNS TABLE (
 LANGUAGE SQL
 AS $$
     SELECT
-        i.nick_membro AS usuario,
-        COUNT(i.nome_canal) AS total_canais,
-        SUM(nc.valor) AS total_gasto
+        usuario,
+        total_canais,
+        total_gasto
     FROM
-        trabbd2.inscricao i
-    JOIN
-        trabbd2.nivelcanal nc
-    ON
-        i.nome_canal = nc.nome_canal AND i.nivel = nc.nivel
+        trabbd2.user_subscriptions
     WHERE
-        p_nick_membro IS NULL OR i.nick_membro = p_nick_membro
-    GROUP BY
-        i.nick_membro;
+        p_nick_membro IS NULL OR usuario = p_nick_membro;
 $$;
 
 SELECT * FROM get_user_subscriptions();
-SELECT * FROM get_user_subscriptions('andrewfreeman');
+SELECT * FROM get_user_subscriptions('adamsingleton');
 
 -- Procedure 3
 DROP FUNCTION IF EXISTS get_canal_doacoes(VARCHAR(255));
@@ -56,23 +52,17 @@ RETURNS TABLE (
 LANGUAGE SQL
 AS $$
     SELECT
-        c.nome AS nome_canal,
-        SUM(d.valor) AS total_doacoes
+        nome_canal,
+        total_doacoes
     FROM
-        trabbd2.doacao d
-    JOIN
-        trabbd2.video v ON d.id_video = v.id_video
-    JOIN
-        trabbd2.canal c ON v.nome_canal = c.nome
+        trabbd2.top_canais
     WHERE
-        p_nome_canal IS NULL OR c.nome = p_nome_canal
-    GROUP BY
-        c.nome
+        p_nome_canal IS NULL OR nome_canal = p_nome_canal
     ORDER BY
         total_doacoes DESC;
 $$;
 SELECT * FROM get_canal_doacoes();
-SELECT * FROM get_canal_doacoes('jamescasey_channel');
+SELECT * FROM get_canal_doacoes('marialynn_channel');
 
 -- Procedure 4
 DROP FUNCTION IF EXISTS get_video_doacoes(p_id_video INT);
@@ -85,17 +75,12 @@ RETURNS TABLE (
 LANGUAGE SQL
 AS $$
     SELECT
-        d.id_video,
-        SUM(d.valor) AS total_doacoes
+        id_video,
+        total_doacoes
     FROM
-        trabbd2.doacao d
-    JOIN
-        trabbd2.comentario c ON d.id_video = c.id_video AND d.nick_usuario = c.nick_usuario AND d.seq_comentario = c.seq
+        trabbd2.video_doacoes
     WHERE
-        c.coment_on = TRUE AND
-        (p_id_video IS NULL OR d.id_video = p_id_video)
-    GROUP BY
-        d.id_video
+        (p_id_video IS NULL OR id_video = p_id_video)
     ORDER BY
         total_doacoes DESC;
 $$;
@@ -113,12 +98,10 @@ RETURNS TABLE (
 LANGUAGE sql
 AS $$
     SELECT
-        p.nome_canal,
-        SUM(p.valor) AS total_patrocinio
+        nome_canal,
+        total_patrocinio
     FROM
-        trabbd2.patrocinio p
-    GROUP BY
-        p.nome_canal
+        trabbd2.top_canais
     ORDER BY
         total_patrocinio DESC
     LIMIT k;
@@ -137,14 +120,10 @@ RETURNS TABLE (
 LANGUAGE SQL
 AS $$
     SELECT
-        nc.nome_canal,
-        SUM(nc.valor) AS total_aportes
+        nome_canal,
+        total_aportes
     FROM
-        trabbd2.inscricao i
-    JOIN
-        trabbd2.nivelcanal nc ON i.nome_canal = nc.nome_canal AND i.nivel = nc.nivel
-    GROUP BY
-        nc.nome_canal
+        trabbd2.top_canais
     ORDER BY
         total_aportes DESC
     LIMIT k;
@@ -163,14 +142,10 @@ RETURNS TABLE (
     LANGUAGE SQL
 AS $$
     SELECT
-        v.nome_canal,
-        SUM(d.valor) AS total_doacoes
+        nome_canal,
+        total_doacoes
     FROM
-        trabbd2.doacao d
-    JOIN
-        trabbd2.video v ON d.id_video = v.id_video
-    GROUP BY
-        v.nome_canal
+        trabbd2.top_canais
     ORDER BY
         total_doacoes DESC
     LIMIT k;
@@ -189,45 +164,10 @@ RETURNS TABLE (
 LANGUAGE sql
 AS $$
     SELECT
-        c.nome AS nome_canal,
-        COALESCE(SUM(p.total_patrocinio), 0) +
-        COALESCE(SUM(m.total_aportes), 0) +
-        COALESCE(SUM(d.total_doacoes), 0) AS total_faturamento
+        nome_canal,
+        total_faturamento
     FROM
-        trabbd2.canal c
-    LEFT JOIN (
-        SELECT
-            p.nome_canal,
-            SUM(p.valor) AS total_patrocinio
-        FROM
-            trabbd2.patrocinio p
-        GROUP BY
-            p.nome_canal
-    ) p ON c.nome = p.nome_canal
-    LEFT JOIN (
-        SELECT
-            nc.nome_canal,
-            SUM(nc.valor) AS total_aportes
-        FROM
-            trabbd2.inscricao i
-        JOIN
-            trabbd2.nivelcanal nc ON i.nome_canal = nc.nome_canal AND i.nivel = nc.nivel
-        GROUP BY
-            nc.nome_canal
-    ) m ON c.nome = m.nome_canal
-    LEFT JOIN (
-        SELECT
-            v.nome_canal,
-            SUM(d.valor) AS total_doacoes
-        FROM
-            trabbd2.doacao d
-        JOIN
-            trabbd2.video v ON d.id_video = v.id_video
-        GROUP BY
-            v.nome_canal
-    ) d ON c.nome = d.nome_canal
-    GROUP BY
-        c.nome
+        trabbd2.top_canais
     ORDER BY
         total_faturamento DESC
 LIMIT k;
