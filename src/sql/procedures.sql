@@ -237,25 +237,14 @@ SELECT * FROM get_top_k_canais_faturamento(10);
 
 -- procedure 9 para view materializada total_arrecadado_por_streamer_mat
 
-DROP FUNCTION IF EXISTS refresh_total_arrecadado_por_streamer_mat();
+DROP FUNCTION IF EXISTS refresh_top_canais_faturamento();
 
-CREATE OR REPLACE FUNCTION refresh_total_arrecadado_por_streamer_mat()
+CREATE OR REPLACE FUNCTION refresh_top_canais_faturamento()
 RETURNS VOID
 LANGUAGE plpgsql
 AS $$
 BEGIN
-    REFRESH MATERIALIZED VIEW total_arrecadado_por_streamer_mat;
+    REFRESH MATERIALIZED VIEW top_canais_faturamento;
 END;
 $$;
 
--- procedure 10 para view materializada membros_ativos_por_canal
-DROP FUNCTION IF EXISTS refresh_membros_ativos_por_canal();
-
-CREATE OR REPLACE FUNCTION refresh_membros_ativos_por_canal()
-RETURNS VOID
-LANGUAGE plpgsql
-AS $$
-BEGIN
-    REFRESH MATERIALIZED VIEW membros_ativos_por_canal;
-END;
-$$;
