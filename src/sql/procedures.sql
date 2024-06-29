@@ -8,7 +8,7 @@ AS $$
 SELECT
     nome_canal, empresa_pagadora, valor_patrocinio
 FROM
-    canais_patrocinados
+    trabbd2.canais_patrocinados
 WHERE
     empresa_pagadora = empresa_nome OR empresa_nome IS NULL
 ORDER BY valor_patrocinio DESC;

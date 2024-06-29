@@ -91,7 +91,7 @@ LEFT JOIN (
         v.nome_canal
     ) d ON c.nome = d.nome_canal
 GROUP BY
-    c.nome, p.total_patrocinio, m.total_aportes, d.total_doacoes;
+    c.nome;
 
 
 -- Fazer hash em cima de nomes para indices,
