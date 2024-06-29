@@ -15,17 +15,21 @@ INNER JOIN
 
 CREATE OR REPLACE VIEW user_subscriptions AS
 SELECT
-    i.nick_membro AS usuario,
+    u.nick AS usuario,
     COUNT(i.nome_canal) AS total_canais,
     SUM(nc.valor) AS total_gasto
 FROM
-    trabbd2.inscricao i
+    trabbd2.usuario u
+JOIN
+    inscricao i
+ON
+    i.nick_membro = u.nick
 JOIN
     trabbd2.nivelcanal nc
-    ON
+ON
     i.nome_canal = nc.nome_canal AND i.nivel = nc.nivel
 GROUP BY
-    i.nick_membro;
+    u.nick;
 
 
 -- View para listar os videos e a soma dos valores de doações recebidas
@@ -50,11 +54,16 @@ ORDER BY
 
 -- View para mostrar os maiores valores por canal
 
+drop materialized view top_canais;
+
 CREATE MATERIALIZED VIEW top_canais AS
 SELECT
     c.nome AS nome_canal,
+    p.qtd_patrocinio,
     COALESCE(SUM(p.total_patrocinio), 0) as total_patrocinio,
+    m.qtd_aportes,
     COALESCE(SUM(m.total_aportes), 0) as total_aportes,
+    d.qtd_doacoes,
     COALESCE(SUM(d.total_doacoes), 0) as total_doacoes,
     total_patrocinio + total_aportes + total_doacoes AS total_faturamento
 FROM
@@ -62,6 +71,7 @@ FROM
 LEFT JOIN (
     SELECT
     p.nome_canal,
+    COUNT(p.valor) AS qtd_patrocinio,
     SUM(p.valor) AS total_patrocinio
     FROM
         trabbd2.patrocinio p
@@ -71,6 +81,7 @@ LEFT JOIN (
 LEFT JOIN (
     SELECT
         nc.nome_canal,
+        COUNT(nc.valor) AS qtd_aportes,
         SUM(nc.valor) AS total_aportes
     FROM
         trabbd2.inscricao i
@@ -82,6 +93,7 @@ LEFT JOIN (
 LEFT JOIN (
     SELECT
         v.nome_canal,
+        COUNT(d.valor) AS qtd_doacoes,
         SUM(d.valor) AS total_doacoes
     FROM
         trabbd2.doacao d
@@ -91,7 +103,7 @@ LEFT JOIN (
         v.nome_canal
     ) d ON c.nome = d.nome_canal
 GROUP BY
-    c.nome;
+    c.nome, p.qtd_patrocinio, c.nome, m.qtd_aportes, d.qtd_doacoes, total_patrocinio + total_aportes + total_doacoes;
 
 
 -- Fazer hash em cima de nomes para indices,

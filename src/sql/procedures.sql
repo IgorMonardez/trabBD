@@ -93,17 +93,19 @@ DROP FUNCTION IF EXISTS get_top_k_canais_patrocinio(INT);
 CREATE OR REPLACE FUNCTION get_top_k_canais_patrocinio(k INT)
 RETURNS TABLE (
     nome_canal VARCHAR(255),
+    qtd_patrocinio DECIMAL(10,2),
     total_patrocinio DECIMAL(10, 2)
 )
 LANGUAGE sql
 AS $$
     SELECT
         nome_canal,
+        qtd_patrocinio,
         total_patrocinio
     FROM
         trabbd2.top_canais
     ORDER BY
-        total_patrocinio DESC
+        qtd_patrocinio DESC
     LIMIT k;
 $$;
 
@@ -115,17 +117,19 @@ DROP FUNCTION IF EXISTS get_top_k_canais_aportes(INT);
 CREATE OR REPLACE FUNCTION get_top_k_canais_aportes(k INT)
 RETURNS TABLE (
     nome_canal VARCHAR(255),
+    qtd_aportes DECIMAL(10,2),
     total_aportes DECIMAL(10, 2)
 )
 LANGUAGE SQL
 AS $$
     SELECT
         nome_canal,
+        qtd_aportes,
         total_aportes
     FROM
         trabbd2.top_canais
     ORDER BY
-        total_aportes DESC
+        qtd_aportes DESC
     LIMIT k;
 $$;
 
@@ -137,17 +141,17 @@ DROP FUNCTION IF EXISTS get_top_k_canais_doacoes(INT);
 CREATE OR REPLACE FUNCTION get_top_k_canais_doacoes(k INT)
 RETURNS TABLE (
     nome_canal VARCHAR(255),
-    total_doacoes DECIMAL(10, 2)
+    qtd_doacoes DECIMAL(10, 2)
 )
     LANGUAGE SQL
 AS $$
     SELECT
         nome_canal,
-        total_doacoes
+        qtd_doacoes
     FROM
         trabbd2.top_canais
     ORDER BY
-        total_doacoes DESC
+        qtd_doacoes DESC
     LIMIT k;
 $$;
 
