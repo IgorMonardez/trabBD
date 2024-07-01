@@ -19,3 +19,7 @@ Comentários inseridos com sucesso!
 Tenha em mente que os valores desse script podem ser alterados. Do jeito que está, ele está configurado para criar
 100 streamers, cada um tem seu canal, são adicionados de 50 a 100 vídeos por streamer e 100 a 300 comentários por vídeo.
 A parte que mais demora nessa configuração é dos comentários, com um tempo de mais de 2 horas para ser concluído a inserção.
+
+### Data dump
+Como o arquivo estava com mais de 200mb hosteamos no google drive, qualquer pessoa com o dominio @id.uff.br pode acessar
+[Arquivo_data_dump](https://drive.google.com/file/d/1zDBb6I9ywGddQwsYso9fOwKWflmYzT4q/view?usp=sharing)
