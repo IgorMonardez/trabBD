@@ -15,11 +15,11 @@ Vídeos e participantes inseridos com sucesso!
 Comentários inseridos com sucesso!
 ```
 
-## Configurando
+### Configurando
 Tenha em mente que os valores desse script podem ser alterados. Do jeito que está, ele está configurado para criar
 100 streamers, cada um tem seu canal, são adicionados de 50 a 100 vídeos por streamer e 100 a 300 comentários por vídeo.
 A parte que mais demora nessa configuração é dos comentários, com um tempo de mais de 2 horas para ser concluído a inserção.
 
-### Data dump
-Como o arquivo estava com mais de 200mb hosteamos no google drive, qualquer pessoa com o dominio @id.uff.br pode acessar
-[Arquivo_data_dump](https://drive.google.com/file/d/1nJl9uopDu_SPqAwAJOI1ZRWRt1-yxnbw/view?usp=sharing)
+### SQL Dump
+
+Também está disponível o SQL Dump do banco de dados, que pode ser baixado [aqui](https://drive.google.com/file/d/1BT8uSAEeEG8Zr6ClQVr7JFlJXrZ8D4Cg/view?usp=sharing).
