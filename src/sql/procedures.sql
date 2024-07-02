@@ -104,8 +104,9 @@ AS $$
         total_patrocinio
     FROM
         trabbd2.top_canais
+    WHERE qtd_patrocinio IS NOT NULL
     ORDER BY
-        qtd_patrocinio DESC
+        qtd_patrocinio DESC, total_patrocinio DESC
     LIMIT k;
 $$;
 
@@ -128,6 +129,7 @@ AS $$
         total_aportes
     FROM
         trabbd2.top_canais
+    WHERE qtd_aportes IS NOT NULL
     ORDER BY
         qtd_aportes DESC
     LIMIT k;
@@ -150,6 +152,7 @@ AS $$
         qtd_doacoes
     FROM
         trabbd2.top_canais
+    WHERE qtd_doacoes IS NOT NULL
     ORDER BY
         qtd_doacoes DESC
     LIMIT k;
@@ -172,23 +175,11 @@ AS $$
         total_faturamento
     FROM
         trabbd2.top_canais
+    WHERE total_faturamento IS NOT NULL
     ORDER BY
         total_faturamento DESC
 LIMIT k;
 $$;
 
 SELECT * FROM get_top_k_canais_faturamento(10);
-
--- procedure 9 para view materializada total_arrecadado_por_streamer_mat
-
-DROP FUNCTION IF EXISTS refresh_top_canais_faturamento();
-
-CREATE OR REPLACE FUNCTION refresh_top_canais_faturamento()
-RETURNS VOID
-LANGUAGE plpgsql
-AS $$
-BEGIN
-    REFRESH MATERIALIZED VIEW top_canais_faturamento;
-END;
-$$;
 
